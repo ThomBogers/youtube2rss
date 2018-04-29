@@ -8,25 +8,15 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"time"
+	"encoding/json"
 )
-
-var YoutubeDlPath = "C:\\Users\\Thom\\scoop\\apps\\youtube-dl\\current\\youtube-dl.exe"
-
-var FeedUrl = "https://www.youtube.com/feeds/videos.xml?channel_id=UCG9lNhVqk9luFLxBKDzuO9g" // 5secfilms for testing
-
-/*
-TODO
-	- serialize meta data to id.meta  https://medium.com/@kpbird/golang-serialize-struct-using-gob-part-1-e927a6547c00
-	- generate feed based on <id>.meta and <id.mp3> https://github.com/gorilla/feeds
-*/
 
 func main() {
 	fmt.Print("Starting rss download\n")
 
-	feed, err := rss.Fetch(FeedUrl)
-	if err != nil {
-		fmt.Print("Failed to fetch rss feed")
-	}
+	feed, err := rss.Fetch(FeedConfig.RetreiveUrl)
+	Check(err, "Failed to fetch rss feed")
 
 	fmt.Print("Got rss feed\n")
 
@@ -43,16 +33,31 @@ func main() {
 		}
 
 		videoId := re.FindStringSubmatch(item.Link)[1]
-		outputFile := fmt.Sprintf("./output/%s.mp3", videoId)
+		outputFile := fmt.Sprintf("%s/%s.mp3", TargetDir, videoId)
+		metaFile   := fmt.Sprintf("%s//%s.json", TargetDir, videoId)
 
 		if existingFile(outputFile) {
 			//When we encounter a file we have already downloaded we are done
 			break
 		}
 
+		var rssitem = RssItem{
+			outputFile,
+			item.Link,
+			videoId,
+			item.Title,
+			time.Now(),
+		}
 
-		fmt.Printf("Got item %s: %s %s\n", videoId, item.Title, item.Link)
-		downloadFile(outputFile, item.Link)
+		fmt.Printf("Got item: %s\n", item.Title)
+
+		itemJson, err := json.Marshal(rssitem)
+		Check(err, "Failed to marshal meta data")
+
+		err = ioutil.WriteFile(metaFile, itemJson, 0644)
+		Check(err, "Failed to write meta data")
+
+		downloadFile(rssitem)
 
 		break
 	}
@@ -69,34 +74,28 @@ func existingFile(f string) bool {
 
 func validTitle(item *rss.Item) bool {
 	matched, err := regexp.Match("PKA.*", []byte(item.Title))
-
-	if err != nil {
-		log.Fatal("Failed to match item")
-	}
+	Check(err, "Failed to match item")
 
 	return matched
 }
 
-func downloadFile(outputFile string, videoURL string) {
-	fmt.Printf("Starting download for %s\n", videoURL)
+func downloadFile(rssitem RssItem) {
+	fmt.Printf("Starting download for: %s to: %s\n", rssitem.Link, rssitem.Path)
 
-	var cmd = exec.Command(YoutubeDlPath, "--extract-audio", "--audio-format", "mp3", "--output", outputFile, videoURL)
+	var cmd = exec.Command(YoutubeDlPath, "--extract-audio", "--audio-format", "mp3", "--output", rssitem.Path, rssitem.Link)
 	//cmd.Args = args
 
 	stderr, err := cmd.StderrPipe()
-	if err != nil {
-		log.Fatal(err)
-	}
+	Check(err, "Setting up Stderr pipe failed")
 
-	if err := cmd.Start(); err != nil {
-		log.Fatal(err)
-	}
+	err = cmd.Start()
+	Check(err, "Starting command failed")
 
-	slurp, _ := ioutil.ReadAll(stderr)
-	fmt.Printf("%s\n", slurp)
+	_, err = ioutil.ReadAll(stderr)
+	Check(err, "Sluping input failed")
 
-	if err := cmd.Wait(); err != nil {
-		log.Fatal(err)
-	}
-	fmt.Printf("Finished download for %s\n", videoURL)
+	err = cmd.Wait()
+	Check(err, "Waiting for command failed")
+
+	fmt.Printf("Finished download for %s\n", rssitem.Link)
 }
