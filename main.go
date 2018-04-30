@@ -8,8 +8,6 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
-	"time"
-	"encoding/json"
 )
 
 func main() {
@@ -34,30 +32,14 @@ func main() {
 
 		videoId := re.FindStringSubmatch(item.Link)[1]
 		outputFile := fmt.Sprintf("%s/%s.mp3", TargetDir, videoId)
-		metaFile   := fmt.Sprintf("%s//%s.json", TargetDir, videoId)
 
 		if existingFile(outputFile) {
 			//When we encounter a file we have already downloaded we are done
 			break
 		}
 
-		var rssitem = RssItem{
-			outputFile,
-			item.Link,
-			videoId,
-			item.Title,
-			time.Now(),
-		}
-
 		fmt.Printf("Got item: %s\n", item.Title)
-
-		itemJson, err := json.Marshal(rssitem)
-		Check(err, "Failed to marshal meta data")
-
-		err = ioutil.WriteFile(metaFile, itemJson, 0644)
-		Check(err, "Failed to write meta data")
-
-		downloadFile(rssitem)
+		downloadFile(item.Link, videoId, outputFile)
 
 		break
 	}
@@ -79,23 +61,26 @@ func validTitle(item *rss.Item) bool {
 	return matched
 }
 
-func downloadFile(rssitem RssItem) {
-	fmt.Printf("Starting download for: %s to: %s\n", rssitem.Link, rssitem.Path)
+func downloadFile(Link string, VideoId string, Path string) {
+	fmt.Printf("Starting download for: %s to: %s\n", Link, Path)
 
-	var cmd = exec.Command(YoutubeDlPath, "--extract-audio", "--audio-format", "mp3", "--output", rssitem.Path, rssitem.Link)
+	var cmd = exec.Command(YoutubeDlPath, "--print-json", "--extract-audio", "--audio-format", "mp3", "--audio-quality", "9", "--output", Path, Link)
 	//cmd.Args = args
 
-	stderr, err := cmd.StderrPipe()
+	stdout, err := cmd.StdoutPipe()
 	Check(err, "Setting up Stderr pipe failed")
 
 	err = cmd.Start()
 	Check(err, "Starting command failed")
 
-	_, err = ioutil.ReadAll(stderr)
+	data, err := ioutil.ReadAll(stdout)
 	Check(err, "Sluping input failed")
+
+	err = ioutil.WriteFile(fmt.Sprintf("%s/%s.json", TargetDir, VideoId), []byte(data), 0644)
+	Check(err, "Failed to write yson to disk")
 
 	err = cmd.Wait()
 	Check(err, "Waiting for command failed")
 
-	fmt.Printf("Finished download for %s\n", rssitem.Link)
+	fmt.Printf("Finished download for %s\n", Link)
 }

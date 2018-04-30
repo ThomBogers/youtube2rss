@@ -14,14 +14,26 @@
   revision = "3358181d7394e26beccfae0ffde05193ef3be33a"
 
 [[projects]]
+  name = "github.com/eduncan911/podcast"
+  packages = ["."]
+  revision = "b2888626672c83990148ef3c246fc9ece499d2b8"
+  version = "v1.3.0"
+
+[[projects]]
   name = "github.com/gorilla/feeds"
   packages = ["."]
   revision = "6edcbcd2d57fd0bbd7f39947a593ed0c06648388"
   version = "v1.1.0"
 
+[[projects]]
+  name = "github.com/pkg/errors"
+  packages = ["."]
+  revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
+  version = "v0.8.0"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "75bdfffeb66cf13233bd1aec52fb58b4afd308ccc9b624342c3f928a822b4357"
+  inputs-digest = "4995d254e507b75c438d995114a8efa9a3b9cad7b63c0b5796be4475dfa445fe"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -1,16 +1,16 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"github.com/eduncan911/podcast"
+	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
-	"sort"
-	"github.com/gorilla/feeds"
-	"time"
-	"log"
 	"regexp"
-	"encoding/json"
-	"io/ioutil"
+	"sort"
+	"time"
 )
 
 type ByFileDate []os.FileInfo
@@ -26,7 +26,7 @@ func (nf ByFileDate) Less(i, j int) bool {
 
 func main() {
 	var files []os.FileInfo
-	var metas = make(map[string]RssItem)
+	var ymeta = make(map[string]YoutubeDlData_s)
 
 	err := filepath.Walk(TargetDir, func(path string, info os.FileInfo, err error) error {
 		fmt.Printf("p: %+v i: %+v\n", path, info)
@@ -34,13 +34,13 @@ func main() {
 		if filepath.Ext(path) == ".json" {
 
 			data, err := ioutil.ReadFile(path)
-			Check(err, "Failed to read json meta file ")
+			Check(err, "Failed to read yson meta file ")
 
-			var rssitem RssItem
-			err = json.Unmarshal(data, &rssitem)
+			var youtbeDlData YoutubeDlData_s
+			err = json.Unmarshal(data, &youtbeDlData)
 			Check(err, "Failed to unmarshal json meta data")
 
-			metas[rssitem.VideoId]= rssitem
+			ymeta[youtbeDlData.ID] = youtbeDlData
 
 		} else if filepath.Ext(path) == ".mp3" {
 			files = append(files, info)
@@ -54,16 +54,25 @@ func main() {
 	sort.Reverse(ByFileDate(files))
 
 	now := time.Now()
-	feed := &feeds.Feed{
-		Title:      FeedConfig.Title,
-		Link:        &feeds.Link{Href: FeedConfig.RetreiveUrl},
-		Description: FeedConfig.Description,
-		Author:      &feeds.Author{Name: FeedConfig.AuthorName, Email: FeedConfig.AuthorEmail},
-		Created:     now,
-	}
+	//feed := &feeds.Feed{
+	//	Title:       FeedConfig.Title,
+	//	Link:        &feeds.Link{Href: FeedConfig.RetreiveUrl},
+	//	Description: FeedConfig.Description,
+	//	Author:      &feeds.Author{Name: FeedConfig.AuthorName, Email: FeedConfig.AuthorEmail},
+	//	Created:     now,
+	//}
 
+	p := podcast.New(
+		FeedConfig.Title,
+		FeedConfig.RetreiveUrl,
+		FeedConfig.Description,
+		&now,
+		&now,
+	)
 
-	var feedItems []*feeds.Item
+	p.AddAuthor(FeedConfig.AuthorName, FeedConfig.AuthorEmail)
+	p.AddCategory("Comedy", nil)
+	p.AddImage(fmt.Sprintf("%s/image.png", FeedConfig.PublishUrl))
 
 	for _, file := range files {
 		fmt.Printf("Item: %s\n", file.Name())
@@ -74,28 +83,30 @@ func main() {
 		}
 
 		videoId := re.FindStringSubmatch(file.Name())[1]
-		rssitem, exists := metas[videoId]
+		rssitem, exists := ymeta[videoId]
 
 		if !exists {
 			fmt.Println("Meta not found")
 			continue
 		}
 
-		link        := &feeds.Link{ Href: fmt.Sprintf("%s/%s",FeedConfig.PublishUrl,file.Name())}
-		description := fmt.Sprintf("youtube2rss feed item %s\n", rssitem.Name)
-		item        := feeds.Item{
-			Title: rssitem.Name,
-			Link: link,
-			Description: description,
-			Created: rssitem.Date,
+		pubDate, err := time.Parse("20060102", rssitem.UploadDate)
+
+		item := podcast.Item{
+			Title: rssitem.Title,
+			Description: fmt.Sprintf("youtube2rss feed item %s\n", rssitem.Description),
+			PubDate: &pubDate,
+			GUID: rssitem.ID,
 		}
+		item.AddEnclosure(fmt.Sprintf("%s/data/%s", FeedConfig.PublishUrl, file.Name()), podcast.MP3, file.Size())
 
-		feedItems= append(feedItems, &item)
+		_, err = p.AddItem(item)
+		Check(err, "Failed to add item to feed")
 	}
-	feed.Items = feedItems
 
 
-	rss, err := feed.ToRss()
+	rss := p.String()
+
 	Check(err, "Failed to create rss string")
 
 	err = ioutil.WriteFile(fmt.Sprintf("%s/rss.xml", TargetDir), []byte(rss), 0644)
