@@ -29,7 +29,6 @@ func main() {
 	var ymeta = make(map[string]YoutubeDlData_s)
 
 	err := filepath.Walk(TargetDir, func(path string, info os.FileInfo, err error) error {
-		fmt.Printf("p: %+v i: %+v\n", path, info)
 
 		if filepath.Ext(path) == ".json" {
 
@@ -42,7 +41,7 @@ func main() {
 
 			ymeta[youtbeDlData.ID] = youtbeDlData
 
-		} else if filepath.Ext(path) == ".mp3" {
+		} else if filepath.Ext(path) == fmt.Sprintf(".%s", FeedConfig.FileFormat) {
 			files = append(files, info)
 		}
 		return nil
@@ -74,9 +73,11 @@ func main() {
 	p.AddCategory("Comedy", nil)
 	p.AddImage(fmt.Sprintf("%s/image.png", FeedConfig.PublishUrl))
 
+	regexString := fmt.Sprintf("(.*).%s", FeedConfig.FileFormat)
+	re := regexp.MustCompile(regexString)
+
 	for _, file := range files {
 		fmt.Printf("Item: %s\n", file.Name())
-		re := regexp.MustCompile("(.*).mp3")
 
 		if len(re.FindStringSubmatch(file.Name())) == 0 {
 			log.Fatal("Could not parse videoId from filename ", file.Name())
@@ -93,17 +94,16 @@ func main() {
 		pubDate, err := time.Parse("20060102", rssitem.UploadDate)
 
 		item := podcast.Item{
-			Title: rssitem.Title,
+			Title:       rssitem.Title,
 			Description: fmt.Sprintf("youtube2rss feed item %s\n", rssitem.Description),
-			PubDate: &pubDate,
-			GUID: rssitem.ID,
+			PubDate:     &pubDate,
+			GUID:        rssitem.ID,
 		}
-		item.AddEnclosure(fmt.Sprintf("%s/data/%s", FeedConfig.PublishUrl, file.Name()), podcast.MP3, file.Size())
+		item.AddEnclosure(fmt.Sprintf("%s/data/%s", FeedConfig.PublishUrl, file.Name()), getType(FeedConfig.FileFormat), file.Size())
 
 		_, err = p.AddItem(item)
 		Check(err, "Failed to add item to feed")
 	}
-
 
 	rss := p.String()
 
@@ -114,4 +114,25 @@ func main() {
 
 	fmt.Printf("%s\n", rss)
 
+}
+
+func getType(typeName string) podcast.EnclosureType {
+	switch typeName {
+	case "mp3":
+		return podcast.MP3
+	case "m4a":
+		return podcast.M4A
+	case "m4v":
+		return podcast.M4V
+	case "mp4":
+		return podcast.MP4
+	case "mov":
+		return podcast.MOV
+	case "pdf":
+		return podcast.PDF
+	case "epub":
+		return podcast.EPUB
+	default:
+		return podcast.M4A
+	}
 }

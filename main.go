@@ -31,7 +31,7 @@ func main() {
 		}
 
 		videoId := re.FindStringSubmatch(item.Link)[1]
-		outputFile := fmt.Sprintf("%s/%s.mp3", TargetDir, videoId)
+		outputFile := fmt.Sprintf("%s/%s.%s", TargetDir, videoId, FeedConfig.FileFormat)
 
 		if existingFile(outputFile) {
 			//When we encounter a file we have already downloaded we are done
@@ -64,7 +64,7 @@ func validTitle(item *rss.Item) bool {
 func downloadFile(Link string, VideoId string, Path string) {
 	fmt.Printf("Starting download for: %s to: %s\n", Link, Path)
 
-	var cmd = exec.Command(YoutubeDlPath, "--print-json", "--extract-audio", "--audio-format", "mp3", "--audio-quality", "9", "--output", Path, Link)
+	var cmd = exec.Command(YoutubeDlPath, "--print-json", "--extract-audio", "--audio-format", FeedConfig.FileFormat, "--audio-quality", "9", "--output", Path, Link)
 	//cmd.Args = args
 
 	stdout, err := cmd.StdoutPipe()

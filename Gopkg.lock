@@ -20,12 +20,6 @@
   version = "v1.3.0"
 
 [[projects]]
-  name = "github.com/gorilla/feeds"
-  packages = ["."]
-  revision = "6edcbcd2d57fd0bbd7f39947a593ed0c06648388"
-  version = "v1.1.0"
-
-[[projects]]
   name = "github.com/pkg/errors"
   packages = ["."]
   revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
@@ -34,6 +28,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "4995d254e507b75c438d995114a8efa9a3b9cad7b63c0b5796be4475dfa445fe"
+  inputs-digest = "0840941707ba98d6f10bc490f13a5eadb264c4bf7c28037be012f172dbf88e0e"
   solver-name = "gps-cdcl"
   solver-version = 1
