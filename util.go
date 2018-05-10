@@ -10,9 +10,7 @@ import (
 )
 
 var TargetDir = "output"
-var YoutubeDlPath = "C:\\Users\\Thom\\scoop\\apps\\youtube-dl\\current\\youtube-dl.exe"
-
-//var FeedUrl       =    // woody
+var YoutubeDlPath = "youtube-dl"
 
 type feedConfig struct {
 	RetreiveUrl string `json:"RetreiveUrl"`

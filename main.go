@@ -16,11 +16,12 @@ func main() {
 	feed, err := rss.Fetch(FeedConfig.RetreiveUrl)
 	Check(err, "Failed to fetch rss feed")
 
-	fmt.Print("Got rss feed\n")
+	fmt.Printf("Got rss feed, %d items\n", len(feed.Items))
 
 	for _, item := range feed.Items {
 
 		if !validTitle(item) {
+			fmt.Printf("Skipping item %s\n", item.Title)
 			continue
 		}
 
@@ -34,6 +35,7 @@ func main() {
 		outputFile := fmt.Sprintf("%s/%s.%s", TargetDir, videoId, FeedConfig.FileFormat)
 
 		if existingFile(outputFile) {
+			fmt.Printf("Existing item %s\n", item.Title)
 			//When we encounter a file we have already downloaded we are done
 			break
 		}
