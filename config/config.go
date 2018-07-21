@@ -1,12 +1,11 @@
-package main
+package config
 
 import (
 	"encoding/json"
 	"flag"
 	"fmt"
 	"io/ioutil"
-	"log"
-	"github.com/pkg/errors"
+	"youtube2rss/util"
 )
 
 var TargetDir = "output"
@@ -25,18 +24,18 @@ type feedConfig struct {
 var FeedConfig feedConfig
 
 func init() {
-	readConfigFile()
 	readFlags()
+
 
 	fmt.Printf("Config: %+v", FeedConfig)
 }
 
-func readConfigFile() {
-	data, err := ioutil.ReadFile("./config.json")
-	Check(err, "Failed to read json config file ")
+func readConfigFile(fileName string) {
+	data, err := ioutil.ReadFile(fileName)
+	util.Check(err, "Failed to read json config file ")
 
 	err = json.Unmarshal(data, &FeedConfig)
-	Check(err, "Failed to unmarshal json config data")
+	util.Check(err, "Failed to unmarshal json config data")
 }
 
 func readFlags() {
@@ -47,7 +46,13 @@ func readFlags() {
 	authorName := flag.String("authorName", "", "feed author name")
 	authorEmail := flag.String("authorEmail", "", "feed author email")
 	fileFormat := flag.String("fileFormat", "", "file format")
+	configFile := flag.String("config", "", "config file")
 	flag.Parse()
+
+	// Parse file first, to enable overriding with other flags
+	if len(*configFile) > 0 {
+		readConfigFile(*configFile)
+	}
 
 	if len(*retrieveUrl) > 0 {
 		FeedConfig.RetreiveUrl = *retrieveUrl
@@ -75,11 +80,5 @@ func readFlags() {
 
 	if len(*fileFormat) > 0 {
 		FeedConfig.FileFormat = *fileFormat
-	}
-}
-
-func Check(e error, info string) {
-	if e != nil {
-		log.Fatal(errors.Wrap(e, info))
 	}
 }

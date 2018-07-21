@@ -1,4 +1,4 @@
-package main
+package createFeed
 
 import (
 	"encoding/json"
@@ -11,6 +11,8 @@ import (
 	"regexp"
 	"sort"
 	"time"
+	"youtube2rss"
+
 )
 
 type ByFileDate []os.FileInfo

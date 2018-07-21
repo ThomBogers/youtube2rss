@@ -1,4 +1,4 @@
-package main
+package getFeedItems
 
 import (
 	"fmt"
@@ -8,13 +8,15 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"youtube2rss/config"
+	"youtube2rss/util"
 )
 
 func main() {
 	fmt.Print("Starting rss download\n")
 
-	feed, err := rss.Fetch(FeedConfig.RetreiveUrl)
-	Check(err, "Failed to fetch rss feed")
+	feed, err := rss.Fetch(config.FeedConfig.RetreiveUrl)
+	util.Check(err, "Failed to fetch rss feed")
 
 	fmt.Printf("Got rss feed, %d items\n", len(feed.Items))
 
@@ -32,7 +34,7 @@ func main() {
 		}
 
 		videoId := re.FindStringSubmatch(item.Link)[1]
-		outputFile := fmt.Sprintf("%s/%s.%s", TargetDir, videoId, FeedConfig.FileFormat)
+		outputFile := fmt.Sprintf("%s/%s.%s", config.TargetDir, videoId, config.FeedConfig.FileFormat)
 
 		if existingFile(outputFile) {
 			fmt.Printf("Existing item %s\n", item.Title)
@@ -58,7 +60,7 @@ func existingFile(f string) bool {
 
 func validTitle(item *rss.Item) bool {
 	matched, err := regexp.Match("PKA.*", []byte(item.Title))
-	Check(err, "Failed to match item")
+	util.Check(err, "Failed to match item")
 
 	return matched
 }
@@ -66,23 +68,23 @@ func validTitle(item *rss.Item) bool {
 func downloadFile(Link string, VideoId string, Path string) {
 	fmt.Printf("Starting download for: %s to: %s\n", Link, Path)
 
-	var cmd = exec.Command(YoutubeDlPath, "--print-json", "--extract-audio", "--audio-format", FeedConfig.FileFormat, "--audio-quality", "9", "--output", Path, Link)
+	var cmd = exec.Command(config.YoutubeDlPath, "--print-json", "--extract-audio", "--audio-format", config.FeedConfig.FileFormat, "--audio-quality", "9", "--output", Path, Link)
 	//cmd.Args = args
 
 	stdout, err := cmd.StdoutPipe()
-	Check(err, "Setting up Stderr pipe failed")
+	util.Check(err, "Setting up Stderr pipe failed")
 
 	err = cmd.Start()
-	Check(err, "Starting command failed")
+	util.Check(err, "Starting command failed")
 
 	data, err := ioutil.ReadAll(stdout)
-	Check(err, "Sluping input failed")
+	util.Check(err, "Sluping input failed")
 
-	err = ioutil.WriteFile(fmt.Sprintf("%s/%s.json", TargetDir, VideoId), []byte(data), 0644)
-	Check(err, "Failed to write yson to disk")
+	err = ioutil.WriteFile(fmt.Sprintf("%s/%s.json", config.TargetDir, VideoId), []byte(data), 0644)
+	util.Check(err, "Failed to write yson to disk")
 
 	err = cmd.Wait()
-	Check(err, "Waiting for command failed")
+	util.Check(err, "Waiting for command failed")
 
 	fmt.Printf("Finished download for %s\n", Link)
 }
