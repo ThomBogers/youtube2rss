@@ -9,6 +9,12 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/ThomBogers/youtube2rss"
+  packages = ["."]
+  revision = "5829af519007e4965d481c1a97fc90b160eae736"
+
+[[projects]]
+  branch = "master"
   name = "github.com/axgle/mahonia"
   packages = ["."]
   revision = "3358181d7394e26beccfae0ffde05193ef3be33a"
@@ -28,6 +34,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "0840941707ba98d6f10bc490f13a5eadb264c4bf7c28037be012f172dbf88e0e"
+  inputs-digest = "fec8b713219ea7b613a08d9a53e105c815f5b932e41d46e191d34181ab0ba787"
   solver-name = "gps-cdcl"
   solver-version = 1
