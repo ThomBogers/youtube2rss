@@ -31,6 +31,11 @@ server {
 
 # Todo
 
+- Check weird audio stutter issues (might be caused by moving files in wsl?)
 - Fix rss for podcast
 - Fix nginx config
+- Add proper use description
+- Auto generate complete correctly formatted dir based on config
+- Split config for binaries?
+- Support yaml/json with comments for config?
 
