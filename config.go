@@ -18,6 +18,7 @@ type feedConfig struct {
 	AuthorName  string `json:"AuthorName"`
 	AuthorEmail string `json:"AuthorEmail"`
 	FileFormat  string `json:"FileFormat"`
+	ValidMatch  string `json:"ValidMatch"`
 }
 
 var FeedConfig feedConfig

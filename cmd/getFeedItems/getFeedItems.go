@@ -58,7 +58,7 @@ func existingFile(f string) bool {
 }
 
 func validTitle(item *rss.Item) bool {
-	matched, err := regexp.Match("PKA.*", []byte(item.Title))
+	matched, err := regexp.Match(FeedConfig.ValidMatch, []byte(item.Title))
 	Check(err, "Failed to match item")
 
 	return matched
