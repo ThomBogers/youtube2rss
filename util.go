@@ -1,4 +1,4 @@
-package util
+package youtube2rss
 
 import (
 	"log"

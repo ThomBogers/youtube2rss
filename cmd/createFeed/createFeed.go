@@ -1,4 +1,4 @@
-package createFeed
+package main
 
 import (
 	"encoding/json"
@@ -11,7 +11,7 @@ import (
 	"regexp"
 	"sort"
 	"time"
-	"youtube2rss"
+	. "github.com/ThomBogers/youtube2rss"
 
 )
 

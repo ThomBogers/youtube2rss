@@ -1,11 +1,10 @@
-package config
+package youtube2rss
 
 import (
 	"encoding/json"
 	"flag"
 	"fmt"
 	"io/ioutil"
-	"youtube2rss/util"
 )
 
 var TargetDir = "output"
@@ -32,10 +31,10 @@ func init() {
 
 func readConfigFile(fileName string) {
 	data, err := ioutil.ReadFile(fileName)
-	util.Check(err, "Failed to read json config file ")
+	Check(err, "Failed to read json config file ")
 
 	err = json.Unmarshal(data, &FeedConfig)
-	util.Check(err, "Failed to unmarshal json config data")
+	Check(err, "Failed to unmarshal json config data")
 }
 
 func readFlags() {
