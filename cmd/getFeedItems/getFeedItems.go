@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	. "github.com/ThomBogers/youtube2rss"
 )
 
 func main() {

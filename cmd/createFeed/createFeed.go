@@ -11,6 +11,8 @@ import (
 	"regexp"
 	"sort"
 	"time"
+	. "github.com/ThomBogers/youtube2rss"
+
 )
 
 type ByFileDate []os.FileInfo

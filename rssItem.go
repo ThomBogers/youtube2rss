@@ -1,4 +1,4 @@
-package main
+package youtube2rss
 
 type YoutubeDlData_s struct {
 	WebpageURLBasename string `json:"webpage_url_basename"`
