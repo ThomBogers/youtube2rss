@@ -28,20 +28,20 @@ func (nf ByFileDate) Less(i, j int) bool {
 
 func main() {
 	var files []os.FileInfo
-	var ymeta = make(map[string]YoutubeDlData_s)
+	var youtubeMetaDate = make(map[string]YoutubeDlData_s)
 
-	err := filepath.Walk(TargetDir, func(path string, info os.FileInfo, err error) error {
+	err := filepath.Walk(FeedConfig.TargetDir, func(path string, info os.FileInfo, err error) error {
 
 		if filepath.Ext(path) == ".json" {
 
 			data, err := ioutil.ReadFile(path)
 			Check(err, "Failed to read yson meta file ")
 
-			var youtbeDlData YoutubeDlData_s
-			err = json.Unmarshal(data, &youtbeDlData)
+			var youtubeDlData YoutubeDlData_s
+			err = json.Unmarshal(data, &youtubeDlData)
 			Check(err, "Failed to unmarshal json meta data")
 
-			ymeta[youtbeDlData.ID] = youtbeDlData
+			youtubeMetaDate[youtubeDlData.ID] = youtubeDlData
 
 		} else if filepath.Ext(path) == fmt.Sprintf(".%s", FeedConfig.FileFormat) {
 			files = append(files, info)
@@ -55,17 +55,10 @@ func main() {
 	sort.Reverse(ByFileDate(files))
 
 	now := time.Now()
-	//feed := &feeds.Feed{
-	//	Title:       FeedConfig.Title,
-	//	Link:        &feeds.Link{Href: FeedConfig.RetreiveUrl},
-	//	Description: FeedConfig.Description,
-	//	Author:      &feeds.Author{Name: FeedConfig.AuthorName, Email: FeedConfig.AuthorEmail},
-	//	Created:     now,
-	//}
 
 	p := podcast.New(
 		FeedConfig.Title,
-		FeedConfig.RetreiveUrl,
+		FeedConfig.RetrieveUrl,
 		FeedConfig.Description,
 		&now,
 		&now,
@@ -86,20 +79,20 @@ func main() {
 		}
 
 		videoId := re.FindStringSubmatch(file.Name())[1]
-		rssitem, exists := ymeta[videoId]
+		rssItem, exists := youtubeMetaDate[videoId]
 
 		if !exists {
 			fmt.Println("Meta not found")
 			continue
 		}
 
-		pubDate, err := time.Parse("20060102", rssitem.UploadDate)
+		pubDate, err := time.Parse("20060102", rssItem.UploadDate)
 
 		item := podcast.Item{
-			Title:       rssitem.Title,
-			Description: fmt.Sprintf("youtube2rss feed item %s\n", rssitem.Description),
+			Title:       rssItem.Title,
+			Description: fmt.Sprintf("youtube2rss feed item %s\n", rssItem.Description),
 			PubDate:     &pubDate,
-			GUID:        rssitem.ID,
+			GUID:        rssItem.ID,
 		}
 		item.AddEnclosure(fmt.Sprintf("%s/data/%s", FeedConfig.PublishUrl, file.Name()), getType(FeedConfig.FileFormat), file.Size())
 
@@ -111,7 +104,7 @@ func main() {
 
 	Check(err, "Failed to create rss string")
 
-	err = ioutil.WriteFile(fmt.Sprintf("%s/rss.xml", TargetDir), []byte(rss), 0644)
+	err = ioutil.WriteFile(fmt.Sprintf("%s/rss.xml", FeedConfig.TargetDir), []byte(rss), 0644)
 	Check(err, "Failed to write rss to disk")
 
 	fmt.Printf("%s\n", rss)

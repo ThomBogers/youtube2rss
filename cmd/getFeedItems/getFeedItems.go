@@ -14,7 +14,7 @@ import (
 func main() {
 	fmt.Print("Starting rss download\n")
 
-	feed, err := rss.Fetch(FeedConfig.RetreiveUrl)
+	feed, err := rss.Fetch(FeedConfig.RetrieveUrl)
 	Check(err, "Failed to fetch rss feed")
 
 	fmt.Printf("Got rss feed, %d items\n", len(feed.Items))
@@ -33,7 +33,7 @@ func main() {
 		}
 
 		videoId := re.FindStringSubmatch(item.Link)[1]
-		outputFile := fmt.Sprintf("%s/%s.%s", TargetDir, videoId, FeedConfig.FileFormat)
+		outputFile := fmt.Sprintf("%s/%s.%s", FeedConfig.TargetDir, videoId, FeedConfig.FileFormat)
 
 		if existingFile(outputFile) {
 			fmt.Printf("Existing item %s\n", item.Title)
@@ -58,7 +58,7 @@ func existingFile(f string) bool {
 }
 
 func validTitle(item *rss.Item) bool {
-	matched, err := regexp.Match("PKA.*", []byte(item.Title))
+	matched, err := regexp.Match(FeedConfig.ValidMatch, []byte(item.Title))
 	Check(err, "Failed to match item")
 
 	return matched
@@ -77,10 +77,10 @@ func downloadFile(Link string, VideoId string, Path string) {
 	Check(err, "Starting command failed")
 
 	data, err := ioutil.ReadAll(stdout)
-	Check(err, "Sluping input failed")
+	Check(err, "Slurping input failed")
 
-	err = ioutil.WriteFile(fmt.Sprintf("%s/%s.json", TargetDir, VideoId), []byte(data), 0644)
-	Check(err, "Failed to write yson to disk")
+	err = ioutil.WriteFile(fmt.Sprintf("%s/%s.json", FeedConfig.TargetDir, VideoId), []byte(data), 0644)
+	Check(err, "Failed to write youtube metadata json to disk")
 
 	err = cmd.Wait()
 	Check(err, "Waiting for command failed")

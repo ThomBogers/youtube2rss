@@ -7,17 +7,18 @@ import (
 	"io/ioutil"
 )
 
-var TargetDir = "output"
 var YoutubeDlPath = "youtube-dl"
 
 type feedConfig struct {
-	RetreiveUrl string `json:"RetreiveUrl"`
+	RetrieveUrl string `json:"RetrieveUrl"`
 	PublishUrl  string `json:"PublishUrl"`
 	Description string `json:"Description"`
 	Title       string `json:"Title"`
 	AuthorName  string `json:"AuthorName"`
 	AuthorEmail string `json:"AuthorEmail"`
 	FileFormat  string `json:"FileFormat"`
+	ValidMatch  string `json:"ValidMatch"`
+	TargetDir   string `json:"TargetDir"`
 }
 
 var FeedConfig feedConfig
@@ -46,6 +47,9 @@ func readFlags() {
 	authorEmail := flag.String("authorEmail", "", "feed author email")
 	fileFormat := flag.String("fileFormat", "", "file format")
 	configFile := flag.String("config", "", "config file")
+	validMatch := flag.String("validMatch", "", "regex to match youtube video titles to")
+	targetDir := flag.String("targetDir", "", "directory to download files to")
+
 	flag.Parse()
 
 	// Parse file first, to enable overriding with other flags
@@ -54,7 +58,7 @@ func readFlags() {
 	}
 
 	if len(*retrieveUrl) > 0 {
-		FeedConfig.RetreiveUrl = *retrieveUrl
+		FeedConfig.RetrieveUrl = *retrieveUrl
 	}
 
 	if len(*publishUrl) > 0 {
@@ -79,5 +83,13 @@ func readFlags() {
 
 	if len(*fileFormat) > 0 {
 		FeedConfig.FileFormat = *fileFormat
+	}
+
+	if len(*validMatch) > 0 {
+		FeedConfig.ValidMatch = *validMatch
+	}
+
+	if len(*targetDir) > 0 {
+		FeedConfig.TargetDir = *targetDir
 	}
 }
