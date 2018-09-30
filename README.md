@@ -2,14 +2,17 @@
 # Project Config file
 Configuration is read from a file name config.json placed in the root of this project
 ```
-{
-  "RetreiveUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=example",
-  "PublishUrl": "http://casts.example.com/feed/rss.xml",
-  "Description": "Rss feed for podcast based on youtube channel",
-  "Title": "My custom rss feed",
-  "AuthorName": "example",
-  "AuthorEmail": "example@example.com"
-}
+{                                                                                                 
+  "RetrieveUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=example",  
+  "PublishUrl": "http://casts.example.com/feed/rss.xml",                                                       
+  "Description": "Rss feed for podcast based on youtube channel",                                 
+  "Title": "My custom rss feed",                                                                  
+  "AuthorName": "example",                                                                           
+  "AuthorEmail": "example@example.com",                                                                  
+  "FileFormat": "mp3",                                                                            
+  "ValidMatch": ".*",                                                                             
+  "TargetDir": "/home/example/rss/example"                                                               
+}                                                                                                 
 ```
 
 # Nginx configuration file
