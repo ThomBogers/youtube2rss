@@ -11,6 +11,7 @@ var YoutubeDlPath = "youtube-dl"
 
 type feedConfig struct {
 	RetrieveUrl string `json:"RetrieveUrl"`
+	RetrieveLimit int `json:"RetrieveLimit"`
 	PublishUrl  string `json:"PublishUrl"`
 	Description string `json:"Description"`
 	Title       string `json:"Title"`
@@ -40,6 +41,7 @@ func readConfigFile(fileName string) {
 
 func readFlags() {
 	retrieveUrl := flag.String("retrieveUrl", "", "url to read from")
+	retrieveLimit := flag.Int("retrieveLimit", 5, "maximum number of items to retrieve")
 	publishUrl := flag.String("publishUrl", "", "url to publish to")
 	description := flag.String("description", "", "feed description")
 	title := flag.String("title", "", "feed title")
@@ -60,6 +62,8 @@ func readFlags() {
 	if len(*retrieveUrl) > 0 {
 		FeedConfig.RetrieveUrl = *retrieveUrl
 	}
+
+	FeedConfig.RetrieveLimit = *retrieveLimit
 
 	if len(*publishUrl) > 0 {
 		FeedConfig.PublishUrl = *publishUrl

@@ -4,6 +4,7 @@ Configuration is read from a file name config.json placed in the root of this pr
 ```
 {                                                                                                 
   "RetrieveUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=example",  
+  "RetrieveLimit": 5,
   "PublishUrl": "http://casts.example.com/feed/rss.xml",                                                       
   "Description": "Rss feed for podcast based on youtube channel",                                 
   "Title": "My custom rss feed",                                                                  

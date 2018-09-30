@@ -17,9 +17,9 @@ func main() {
 	feed, err := rss.Fetch(FeedConfig.RetrieveUrl)
 	Check(err, "Failed to fetch rss feed")
 
-	fmt.Printf("Got rss feed, %d items\n", len(feed.Items))
+	fmt.Printf("Got rss feed, found %d/%d items\n", len(feed.Items), FeedConfig.RetrieveLimit)
 
-	for _, item := range feed.Items {
+	for index, item := range feed.Items {
 
 		if !validTitle(item) {
 			fmt.Printf("Skipping item %s\n", item.Title)
@@ -44,7 +44,9 @@ func main() {
 		fmt.Printf("Got item: %s\n", item.Title)
 		downloadFile(item.Link, videoId, outputFile)
 
-		break
+		if index == FeedConfig.RetrieveLimit {
+			break
+		}
 	}
 }
 
